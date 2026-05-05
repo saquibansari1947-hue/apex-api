@@ -7,8 +7,23 @@ const APEX_URL = "https://apex.oracle.com/ords/saanifitness/emp/list";
 
 app.get("/employees", async (req, res) => {
     try {
-        const response = await fetch(APEX_URL);
-        const data = await response.json();
+        const response = await fetch(APEX_URL, {
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        const text = await response.text();
+
+        // Debug check
+        if (text.startsWith("<")) {
+            return res.status(500).json({
+                error: "APEX returned HTML instead of JSON",
+                response: text.substring(0, 200)
+            });
+        }
+
+        const data = JSON.parse(text);
 
         res.json({
             data: data.items

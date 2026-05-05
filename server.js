@@ -9,16 +9,18 @@ app.get("/employees", async (req, res) => {
     try {
         const response = await fetch(APEX_URL, {
             headers: {
-                "Accept": "application/json"
+                "Accept": "application/json",
+                "User-Agent": "Mozilla/5.0"
             }
         });
 
         const text = await response.text();
 
-        // Debug check
+        // DEBUG (important)
         if (text.startsWith("<")) {
             return res.status(500).json({
                 error: "APEX returned HTML instead of JSON",
+                hint: "Check APEX privilege or URL",
                 response: text.substring(0, 200)
             });
         }
@@ -35,5 +37,5 @@ app.get("/employees", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log("Server running on port " + PORT);
+    console.log(`Server running on port ${PORT}`);
 });

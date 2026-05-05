@@ -11,28 +11,16 @@ app.get("/employees", async (req, res) => {
             method: "GET",
             headers: {
                 "Accept": "application/json",
-                "Content-Type": "application/json",
-                "User-Agent": "Mozilla/5.0"
+                "User-Agent": "Mozilla/5.0",
+                "Accept-Language": "en-US,en;q=0.9",
+                "Connection": "keep-alive"
             }
         });
 
-        // ❗ status check
         if (!response.ok) {
-            return res.status(response.status).json({
+            return res.status(500).json({
                 error: "Failed to fetch APEX",
                 status: response.status
-            });
-        }
-
-        const contentType = response.headers.get("content-type");
-
-        // ❗ ensure JSON response
-        if (!contentType || !contentType.includes("application/json")) {
-            const text = await response.text();
-            return res.status(500).json({
-                error: "APEX returned non-JSON",
-                contentType: contentType,
-                preview: text.substring(0, 200)
             });
         }
 
@@ -45,9 +33,7 @@ app.get("/employees", async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({
-            error: error.message
-        });
+        res.status(500).json({ error: error.message });
     }
 });
 

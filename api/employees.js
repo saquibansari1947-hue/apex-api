@@ -3,19 +3,23 @@ export default async function handler(req, res) {
         const response = await fetch("https://apex.oracle.com/ords/saanifitness/emp/list", {
             headers: {
                 "Accept": "application/json",
-                "User-Agent": "Mozilla/5.0",
-                "Referer": "https://apex.oracle.com/"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "Referer": "https://apex.oracle.com/",
+                "Origin": "https://apex.oracle.com"
             }
         });
 
-        if (!response.ok) {
+        const text = await response.text();
+
+        if (response.status !== 200) {
             return res.status(500).json({
-                error: "Failed to fetch APEX",
-                status: response.status
+                error: "Blocked by APEX",
+                status: response.status,
+                response: text.substring(0, 200)
             });
         }
 
-        const data = await response.json();
+        const data = JSON.parse(text);
 
         res.status(200).json({
             success: true,

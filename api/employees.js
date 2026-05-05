@@ -1,19 +1,15 @@
 export default async function handler(req, res) {
-    const APEX_URL = "https://apex.oracle.com/ords/saanifitness/emp/list";
-
     try {
-        const response = await fetch(APEX_URL, {
-            method: "GET",
+        const response = await fetch("https://apex.oracle.com/ords/saanifitness/emp/list", {
             headers: {
                 "Accept": "application/json",
                 "User-Agent": "Mozilla/5.0",
-                "Referer": "https://apex.oracle.com/",
-                "Origin": "https://apex.oracle.com"
+                "Referer": "https://apex.oracle.com/"
             }
         });
 
         if (!response.ok) {
-            return res.status(response.status).json({
+            return res.status(500).json({
                 error: "Failed to fetch APEX",
                 status: response.status
             });
@@ -21,15 +17,12 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        return res.status(200).json({
+        res.status(200).json({
             success: true,
-            count: data.items.length,
             data: data.items
         });
 
-    } catch (error) {
-        return res.status(500).json({
-            error: error.message
-        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 }

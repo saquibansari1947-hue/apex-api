@@ -8,31 +8,46 @@ const APEX_URL = "https://apex.oracle.com/ords/saanifitness/emp/list";
 app.get("/employees", async (req, res) => {
     try {
         const response = await fetch(APEX_URL, {
+            method: "GET",
             headers: {
                 "Accept": "application/json",
+                "Content-Type": "application/json",
                 "User-Agent": "Mozilla/5.0"
             }
         });
 
-        const text = await response.text();
-
-        // DEBUG (important)
-        if (text.startsWith("<")) {
-            return res.status(500).json({
-                error: "APEX returned HTML instead of JSON",
-                hint: "Check APEX privilege or URL",
-                response: text.substring(0, 200)
+        // ❗ status check
+        if (!response.ok) {
+            return res.status(response.status).json({
+                error: "Failed to fetch APEX",
+                status: response.status
             });
         }
 
-        const data = JSON.parse(text);
+        const contentType = response.headers.get("content-type");
+
+        // ❗ ensure JSON response
+        if (!contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+            return res.status(500).json({
+                error: "APEX returned non-JSON",
+                contentType: contentType,
+                preview: text.substring(0, 200)
+            });
+        }
+
+        const data = await response.json();
 
         res.json({
+            success: true,
+            count: data.items.length,
             data: data.items
         });
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: error.message
+        });
     }
 });
 
